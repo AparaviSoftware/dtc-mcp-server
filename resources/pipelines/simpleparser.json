@@ -1,0 +1,118 @@
+{
+  "components": [
+    {
+      "id": "webhook_1",
+      "provider": "webhook",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "type": "webhook"
+      },
+      "ui": {
+        "position": {
+          "x": -80.5,
+          "y": 249.5
+        },
+        "measured": {
+          "width": 140,
+          "height": 116
+        },
+        "data": {
+          "class": "source",
+          "type": "default"
+        },
+        "formDataValid": true
+      }
+    },
+    {
+      "id": "parse_1",
+      "provider": "parse",
+      "config": {},
+      "ui": {
+        "position": {
+          "x": 142.1593396561124,
+          "y": 201.40765471778622
+        },
+        "measured": {
+          "width": 140,
+          "height": 116
+        },
+        "data": {
+          "class": "data",
+          "type": "default"
+        },
+        "formDataValid": true,
+        "edges": [
+          {
+            "selectable": true,
+            "deletable": true,
+            "id": "xy-edge__webhook_1source-tags-0-parse_1target-tags-0",
+            "source": "webhook_1",
+            "target": "parse_1",
+            "sourceHandle": "source-tags-0",
+            "targetHandle": "target-tags-0"
+          }
+        ]
+      },
+      "input": [
+        {
+          "lane": "tags",
+          "from": "webhook_1"
+        }
+      ]
+    },
+    {
+      "id": "response_1",
+      "provider": "response",
+      "config": {
+        "lanes": []
+      },
+      "ui": {
+        "position": {
+          "x": 356.16580099642056,
+          "y": 206.72219128744484
+        },
+        "measured": {
+          "width": 140,
+          "height": 255
+        },
+        "data": {
+          "class": "infrastructure",
+          "type": "default"
+        },
+        "formDataValid": true,
+        "edges": [
+          {
+            "selectable": true,
+            "deletable": true,
+            "id": "xy-edge__parse_1source-text-0-response_1target-text-6",
+            "source": "parse_1",
+            "target": "response_1",
+            "sourceHandle": "source-text-0",
+            "targetHandle": "target-text-6"
+          },
+          {
+            "selectable": true,
+            "deletable": true,
+            "id": "xy-edge__webhook_1source-text-0-response_1target-text-6",
+            "source": "webhook_1",
+            "target": "response_1",
+            "sourceHandle": "source-text-0",
+            "targetHandle": "target-text-6"
+          }
+        ]
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "parse_1"
+        },
+        {
+          "lane": "text",
+          "from": "webhook_1"
+        }
+      ]
+    }
+  ],
+  "id": "8165192c-7407-4a4a-9446-f8a1a742b26e"
+}

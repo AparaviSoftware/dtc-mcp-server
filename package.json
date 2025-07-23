@@ -1,0 +1,32 @@
+{
+  "name": "aparavi-mcp",
+  "version": "1.0.0",
+  "description": "Node.js wrapper for Aparavi MCP Server",
+  "main": "bin/index.js",
+  "bin": {
+    "aparavi-mcp": "./bin/index.js"
+  },
+  "scripts": {
+    "start": "node bin/index.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "bin",
+    "integrations",
+    "prompts",
+    "resources",
+    "tools",
+    "mcp-server.py",
+    "requirements.txt",
+    "__init__.py"
+  ],
+  "keywords": [
+    "aparavi",
+    "mcp",
+    "server"
+  ],
+  "author": "Dylan Savage",
+  "license": "MIT"
+} 
