@@ -1,15 +1,33 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 
-// Get the path to the Python script relative to this file
-const pythonScriptPath = path.join(__dirname, '..', 'mcp-server.py');
+// Get package root directory
+const packageRoot = path.join(__dirname, '..');
+const pythonScriptPath = path.join(packageRoot, 'mcp-server.py');
+const setupScript = path.join(__dirname, 'setup.sh');
+const venvPath = path.join(packageRoot, '.venv');
 
-// Spawn Python process
-const pythonProcess = spawn('python3', [pythonScriptPath], {
-  stdio: 'inherit', // Inherit stdio streams
-  env: process.env  // Pass through environment variables
+// Run setup script
+const setup = spawnSync('bash', [setupScript], {
+  stdio: 'inherit'
+});
+
+if (setup.status !== 0) {
+  console.error('Failed to setup Python environment');
+  process.exit(1);
+}
+
+// Get the Python path based on OS
+const pythonPath = process.platform === 'win32'
+  ? path.join(venvPath, 'Scripts', 'python')
+  : path.join(venvPath, 'bin', 'python');
+
+// Spawn Python process using the virtual environment
+const pythonProcess = spawn(pythonPath, [pythonScriptPath], {
+  stdio: 'inherit',
+  env: process.env
 });
 
 // Handle process events

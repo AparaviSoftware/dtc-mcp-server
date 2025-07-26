@@ -1,4 +1,7 @@
-"""Prompts package for Aparavi MCP server.
+"""Prompts module for Aparavi MCP Server.
 
-This package contains prompt templates and configurations used by the MCP server.
-""" 
+This module contains prompt templates and configurations used for
+document processing and system diagram parsing.
+"""
+
+__version__ = "0.1.0" 

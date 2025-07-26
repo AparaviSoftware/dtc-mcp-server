@@ -3,13 +3,13 @@ Main FastAPI application entry point.
 """
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastmcp.server import FastMCP, Context, server
+from fastmcp import FastMCP, Context
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import AsyncIterator
 
-from tools.document_processor import DocumentProcessor, DocumentRequest, DocumentResponse
+from tools.document_processor import DocumentProcessor, DocumentResponse
+from tools.llama_parse import LLamaParse, LlamaParseClient, LlamaParseResponse
 from integrations.aparavi.client import AparaviClient
 
 # Load environment variables
@@ -18,25 +18,32 @@ load_dotenv()
 @dataclass()
 class AppContext:
     client: AparaviClient
+    llama_client: LlamaParseClient
 
 @asynccontextmanager
 async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
-    """Manage Aparavi API client lifecycle."""
-    api_key = os.getenv("APARAVI_API_KEY")
-    if not api_key:
+    """Manage Aparavi API client and LlamaParse client lifecycle."""
+    # Aparavi client setup
+    aparavi_api_key = os.getenv("APARAVI_API_KEY")
+    if not aparavi_api_key:
         raise ValueError("APARAVI_API_KEY environment variable is required")
     
     base_url = os.getenv("APARAVI_API_URL", "https://eaas-dev.aparavi.com")
-    timeout = int(os.getenv("APARAVI_TIMEOUT", "30"))
     
     client = AparaviClient(
-        api_key=api_key,
+        api_key=aparavi_api_key,
         base_url=base_url,
-        timeout=timeout
     )
+
+    # LlamaParse client setup
+    llama_api_key = os.getenv("LLAMA_INDEX_API_KEY")
+    if not llama_api_key:
+        raise ValueError("LLAMA_INDEX_API_KEY environment variable is required")
+
+    llama_client = LlamaParseClient(api_key=llama_api_key)
     
     try:
-        yield AppContext(client=client)
+        yield AppContext(client=client, llama_client=llama_client)
     finally:
         pass
 
@@ -45,33 +52,45 @@ mcp = FastMCP(
     name="aparavi-mcp",
     lifespan=app_lifespan,
     dependencies=["python-dotenv"],
-    stateless_http=True
+    stateless_http=True  
 )
-
 
 # Register document processing tool
 @mcp.tool()
-def document_processor(request: DocumentRequest, session_id: str, ctx: Context) -> DocumentResponse:
-    """Process a document through Aparavi API."""
+def document_processor(file_path: str, session_id: str = None, ctx: Context = None) -> DocumentResponse:
+    """
+    Use Aparavi to process a document.
+    """
     client = ctx.request_context.lifespan_context.client
     processor = DocumentProcessor(client)
-    return processor.process_document(request)
+    return processor.process_document(file_path=file_path)
 
+@mcp.tool()
+def ocr_system_diagram_parser(file_path: str, session_id: str = None, ctx: Context = None) -> LlamaParseResponse:
+    """
+    Turn an image of a system diagram into a working app using llama parse and Aparavi.
+    """
+    aparavi_client = ctx.request_context.lifespan_context.client
+    llama_client = ctx.request_context.lifespan_context.llama_client
+    
+    parser = LLamaParse(aparavi_client, llama_client)
+    return parser.ocr_system_diagram_parser(file_path=file_path)
 
-# Create ASGI app for MCP server
-# mcp_app = mcp.http_app()
-
-# Create FastAPI app
-# app = FastAPI(
-#     title="Aparavi MCP Server",
-#     description="MCP server for processing documents through Aparavi API",
-#     version="0.1.0",
-#     lifespan=mcp_app.lifespan
-# )
-# # Mount MCP server under /mcp-server path
-# app.mount("/mcp-server", mcp_app)
+@mcp.tool()
+def llama_parse_document_parser(file_path: str, session_id: str = None, ctx: Context = None) -> LlamaParseResponse:
+    """
+    Use LlamaParse's advanced Parsing capabilities to extract text from a document.
+    """
+    aparavi_client = ctx.request_context.lifespan_context.client
+    llama_client = ctx.request_context.lifespan_context.llama_client
+    
+    parser = LLamaParse(aparavi_client, llama_client)
+    return parser.llama_parse_document_parser(file_path=file_path)
 
 if __name__ == "__main__":
-    # import uvicorn
-    # uvicorn.run(app, host="0.0.0.0", port=3001) 
-    mcp.run(transport="http")
+   
+    # For testing locally in repo
+    # mcp.run(transport="http")
+
+    # For testing immediate changes on Client side
+    mcp.run()

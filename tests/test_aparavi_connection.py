@@ -2,111 +2,113 @@
 
 import os
 import json
+import tempfile
 from dotenv import load_dotenv
 from integrations.aparavi.client import AparaviClient
 from integrations.aparavi.exceptions import AparaviError
 
-# Load environment variables
-load_dotenv()
-
 def test_aparavi_connection():
-    """Test basic connection to Aparavi API."""
+    """Test basic connection and API functionality."""
     
-    # Get API credentials
-    api_key = os.getenv("APARAVI_API_KEY")
+    # Load environment variables
+    load_dotenv()
+    api_key = os.getenv('APARAVI_API_KEY')
+    api_url = os.getenv('APARAVI_API_URL', 'https://eaas-dev.aparavi.com')
+    
     if not api_key:
-        print("Error: APARAVI_API_KEY environment variable is required")
+        print("⚠ APARAVI_API_KEY not found in environment")
         return
-    
-    base_url = os.getenv("APARAVI_API_URL", "https://eaas-dev.aparavi.com")
-    print(f"\nTesting connection to Aparavi API:")
-    print(f"Base URL: {base_url}")
+        
+    print("\nTesting Aparavi API connection:")
+    print(f"- API URL: {api_url}")
     
     # Initialize client
     client = AparaviClient(
+        base_url=api_url,
         api_key=api_key,
-        base_url=base_url
+        timeout=120,
+        logs="verbose"
     )
     
-    # Load test pipeline
-    try:
-        with open("resources/pipelines/simpleparser.json", 'r') as f:
-            pipeline_data = json.load(f)
-            
-        pipeline_config = {
-            "pipeline": {
-                "source": "webhook_1",
-                "components": pipeline_data["components"]
-            }
+    # Load test pipeline configuration
+    package_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    pipeline_config_path = os.path.join(package_root, "resources", "pipelines", "simpleparser.json")
+    
+    if not os.path.exists(pipeline_config_path):
+        print(f"⚠ Pipeline configuration not found at: {pipeline_config_path}")
+        return
+        
+    with open(pipeline_config_path, 'r') as f:
+        pipeline_data = json.load(f)
+        
+    pipeline_config = {
+        "pipeline": {
+            "source": "webhook_1",
+            "components": pipeline_data["components"]
         }
-
-        
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Error loading pipeline configuration: {str(e)}")
-        return
-
+    }
+    
+    # Create a temporary test file
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as temp:
+        temp.write("This is a test document for Aparavi API.\n")
+        temp.write("It contains some sample text to process.\n")
+        temp_path = temp.name
+    
     try:
-        # Step 1: Create task and wait for it to be ready
-        print("\nStep 1: Creating and waiting for task...")
-        task_token, ready_status = client.create_and_wait_for_task(
+        print("\nStarting API test sequence...")
+        
+        # Create task and get server-assigned type
+        task_token, task_type, ready_status = client.create_and_wait_for_task(
             pipeline=pipeline_config,
-            name="Test Pipeline Task",
-            type="gpu",
-            max_retries=10,  # Increase retries
-            initial_delay=2.0  # Start with longer delay
+            name="API Connection Test",
+            threads=None
         )
         
-        if ready_status.data and ready_status.data.get("serviceUp"):
-            print("\n✓ Task ready and service is up!")
-            if ready_status.data.get("notes"):
-                print("Webhook URL:", ready_status.data["notes"][0])
-        else:
-            print("\n⚠ Task created but service may not be fully ready")
-            
-        print("Status:")
-        print(json.dumps({
-            "status": ready_status.status,
-            "data": ready_status.data,
-            "error": ready_status.error,
-            "metrics": ready_status.metrics
-        }, indent=2))
-
-        # Step 2: Send test data
-        print("\nStep 2: Sending test data...")
-        result = client.post_to_webhook(
+        print("\nTask ready:")
+        print(f"- Token: {task_token}")
+        print(f"- Type: {task_type}")
+        if ready_status.data and ready_status.data.get("notes"):
+            print(f"- Webhook URL: {ready_status.data['notes'][0]}")
+        
+        # Send test file to webhook using server-assigned type
+        print("\nSending test file to webhook...")
+        responses = client.send_payload_to_webhook(
             token=task_token,
-            data={
-                "content": "This is a test document.",
-                "filename": "test.txt"
-            },
-            type="gpu"
+            task_type=task_type,
+            file_glob=temp_path
         )
-        print("✓ Data sent successfully!")
-        print("Response:")
-        print(json.dumps(result, indent=2))
-
-        # Step 3: Final status check
-        print("\nStep 3: Final status check...")
-        result = client.get_task_status(task_token, type="gpu")
-        print("✓ Final status:")
-        print(json.dumps({
-            "status": result.status,
-            "data": result.data,
-            "error": result.error,
-            "metrics": result.metrics
-        }, indent=2))
-
+        
+        # Process webhook response
+        if responses and responses[0].get('status') == 'OK':
+            result = responses[0]
+            print("\n✓ File processed successfully")
+            print("\nProcessing result:")
+            print(json.dumps(result, indent=2))
+            
+            # Extract and display text content if available
+            if result.get('data', {}).get('objects'):
+                first_object = next(iter(result['data']['objects'].values()))
+                if first_object.get('text'):
+                    print("\nExtracted text:")
+                    print(first_object['text'][0])
+        else:
+            print("\n⚠ Processing failed or returned no results")
+            
+        # End the task
+        print("\nEnding task...")
+        client.end_task(token=task_token, task_type=task_type)
+        print("✓ Task ended successfully")
+        
     except AparaviError as e:
-        print(f"\n✗ Error during task execution: {str(e)}")
-        if "not found" in str(e).lower():
-            print("\nPossible causes:")
-            print("- Task initialization failed")
-            print("- Task was cleaned up too quickly")
-            print("- Service is under heavy load")
-            print("\nSuggestions:")
-            print("- Try increasing max_retries and initial_delay")
-            print("- Check service status")
-        return
+        print(f"\n⚠ Aparavi API error: {e}")
+    except Exception as e:
+        print(f"\n⚠ Unexpected error: {e}")
+    finally:
+        # Clean up temporary file
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
 
 if __name__ == "__main__":
     test_aparavi_connection()

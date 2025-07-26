@@ -5,27 +5,15 @@ import aiohttp
 import json
 import uuid
 from pathlib import Path
-from tools.document_processor import DocumentRequest
 
-async def test_document_processing(processing_type: str = "cpu"):
-    """
-    Test the document processing endpoint.
-    
-    Args:
-        processing_type: Type of processing to use ('gpu' or 'cpu')
-    """
-    url = "http://localhost:8000/mcp"  # Updated to match server mount point
-    test_file_path = "tests/testdata/test_document.txt"
+async def test_document_processing(file_path: str, tool_name: str):
+    """Test the document processing endpoint."""
+    url = "http://localhost:8000/mcp"
+    test_file_path = f"tests/testdata/{file_path}"
     
     if not Path(test_file_path).exists():
         print(f"Please create a test document at {test_file_path}")
         return
-    
-    # Create DocumentRequest instance
-    request = DocumentRequest(
-        file_path=str(Path(test_file_path).absolute()),
-        type=processing_type
-    )
     
     # Generate a session ID
     session_id = str(uuid.uuid4())
@@ -35,18 +23,16 @@ async def test_document_processing(processing_type: str = "cpu"):
         "jsonrpc": "2.0",
         "method": "tools/call",
         "params": {
-            "name": "document_processor",
+            "name": tool_name,
             "arguments": {
-                "request": request.model_dump(),
-                "session_id": session_id
+                "file_path": str(Path(test_file_path).absolute()),
             }
         },
         "id": "1"
     }
     
-    print(f"\nStarting document processing test:")
+    print("\nStarting document processing test:")
     print(f"- File: {test_file_path}")
-    print(f"- Processing type: {processing_type}")
     print(f"- Session ID: {session_id}")
     
     async with aiohttp.ClientSession() as session:
@@ -63,18 +49,34 @@ async def test_document_processing(processing_type: str = "cpu"):
                         line = line.decode('utf-8').strip()
                         if line.startswith('data: '):
                             data = json.loads(line[6:])  # Skip 'data: ' prefix
-                            print("\nRaw output from document processor:")
-                            print(json.dumps(data, indent=2))
+                            if 'result' in data:
+                                print("\nExtracted text:")
+                                if isinstance(data['result'], dict) and 'text' in data['result']:
+                                    print(data['result']['text'])
+                                elif isinstance(data['result'], dict) and 'content' in data['result']:
+                                    for content in data['result']['content']:
+                                        if content.get('type') == 'text':
+                                            print(content['text'])
+                                else:
+                                    print("Raw result:", json.dumps(data['result'], indent=2))
+                            elif 'error' in data:
+                                print("\nError:", data['error'])
                 else:
                     print(f"\nError: HTTP {response.status}")
                     print(await response.text())
         except aiohttp.ClientError as e:
             print(f"\nRequest failed: {e}")
 
-async def run_tests():
-    """Run tests with both GPU and CPU processing."""
-    print("Testing GPU processing...")
-    await test_document_processing("cpu")
+
 
 if __name__ == "__main__":
-    asyncio.run(run_tests()) 
+    # Pass the file path and tool name as arguments
+
+    # available tools:
+    # llama_parse_document_parser
+    # ocr_system_diagram_parser
+    # document_processor
+
+    # available files are all in the tests/testdata folder
+
+    asyncio.run(test_document_processing(file_path="30-60-90-R&D-SFAIINTERNSHIP-DylanSavage.pdf", tool_name="document_processor"))

@@ -2,7 +2,30 @@
 
 An MCP (Model Context Protocol) server that integrates with Aparavi's document processing capabilities. This server allows Language Models to process documents through Aparavi's API and receive cleaned text output.
 
-## Quick Start with NPX
+[![npm version](https://badge.fury.io/js/aparavi-mcp.svg)](https://www.npmjs.com/package/aparavi-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Features
+
+- 📄 Document processing via Aparavi API
+- 🧹 Clean text extraction without metadata
+- 🔌 MCP-compliant interface
+- ⚙️ Environment-based configuration
+- 🚀 Async processing support
+- 📦 Easy installation via NPX
+- 🔍 OCR capabilities for system diagrams
+- 🐍 Python-based with Node.js wrapper
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Development Setup](#development-setup)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+
+## Quick Start
 
 The fastest way to get started is using `npx`:
 
@@ -14,7 +37,44 @@ export APARAVI_API_KEY=your_api_key_here
 npx aparavi-mcp
 ```
 
-## Configuration in MCP Clients
+## Installation
+
+### NPM Global Installation
+
+```bash
+# Install globally
+npm install -g aparavi-mcp
+
+# Run the server
+aparavi-mcp
+```
+
+### Local Development Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/AparaviSoftware/mcp-server
+cd aparavi-mcp
+
+# Make setup script executable
+chmod +x bin/setup.sh
+
+# Run setup script (creates virtual environment and installs dependencies)
+./bin/setup.sh
+
+# Start the server
+node bin/index.js
+```
+
+## Configuration
+
+### Required Environment Variables
+
+- `APARAVI_API_KEY`: Your Aparavi API key (required)
+- `LLAMA_INDEX_API_KEY`= Your LLama Index API key
+
+
+### MCP Client Configuration
 
 When using this server with MCP clients like Windsurf, configure it in your client's configuration file:
 
@@ -24,51 +84,142 @@ When using this server with MCP clients like Windsurf, configure it in your clie
     "aparavi": {
       "command": "npx",
       "args": [
-        "-y",
         "aparavi-mcp@latest"
       ],
       "env": {
         "APARAVI_API_KEY": "your-api-key-here"
+        "LLAMA_INDEX_API_KEY": "your-api-key-here"
       }
     }
   }
 }
 ```
 
-The client will automatically set up the environment variable when launching the server.
+## Development Setup
 
-## Features
+### Prerequisites
 
-- Document processing via Aparavi API
-- Clean text extraction without metadata
-- MCP-compliant interface
-- Environment-based configuration
-- Async processing support
-- Easy installation via NPX
+- Python 3.8 or higher
+- Node.js 14 or higher
+- npm or yarn
 
-## Development
+### Virtual Environment
 
-- Built using FastMCP and FastAPI
-- Direct integration with Aparavi API endpoints
-- Async processing with aiohttp
-- Environment-based configuration
+This project uses Python's virtual environment for dependency management. The virtual environment is stored in the `.venv` directory.
 
-## Configuration
+For local development:
+```bash
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-The server requires one environment variable:
-- `APARAVI_API_KEY`: Your Aparavi API key (required)
+# Install dependencies
+pip install -r requirements.txt
+```
 
-Optional configuration:
-- `APARAVI_API_URL`: Aparavi API base URL (default: https://eaas-dev.aparavi.com)
-- `SERVER_HOST`: Host to bind server to (default: 0.0.0.0)
-- `SERVER_PORT`: Port to bind server to (default: 8000)
-- `REQUEST_TIMEOUT`: API request timeout in seconds (default: 90)
-- `MAX_RETRIES`: Maximum number of retries for failed requests (default: 3)
+When installing via npm, the virtual environment is automatically managed by the setup script.
 
-## Deployment
+### Project Structure
 
-This server can be deployed as a standalone service. It's designed to work with any MCP-compatible client, including LLM agents.
+```
+aparavi-mcp/
+├── bin/                    # Executable scripts
+│   ├── index.js           # Node.js entry point
+│   └── setup.sh           # Python environment setup
+├── integrations/          # External service integrations
+├── tools/                 # MCP tool implementations
+├── resources/             # Configuration and resources
+├── tests/                 # Test files
+├── mcp-server.py         # Main Python server
+├── requirements.txt      # Python dependencies
+└── package.json         # Node.js package config
+```
 
-## License
+## API Documentation
 
-[Add your license information here]
+### Document Processing
+
+Process documents through the Aparavi pipeline:
+
+```python
+# Example Python client code
+import requests
+
+response = requests.post("http://localhost:8000/mcp", json={
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+        "name": "document_processor",
+        "arguments": {
+            "file_path": "/path/to/document.pdf",
+            "session_id": "unique-session-id"
+        }
+    },
+    "id": "1"
+})
+```
+
+### System Diagram OCR
+
+Process system diagrams with OCR capabilities:
+
+```python
+response = requests.post("http://localhost:8000/mcp", json={
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+        "name": "llama_parse_document_parser",
+        "arguments": {
+            "file_path": "/path/to/diagram.jpeg"
+        }
+    },
+    "id": "1"
+})
+```
+
+## Testing
+
+### Testing Locally
+
+IMPORTANT:
+- When testing locally I have found it easier to use transport="http", so when you want to run tests in your terminal then make sure you are running the server with:
+mcp.run(transport="http")
+  This is commented out inside of main() in mcp-server.py
+- The MCPserver runs with transport="stdio" when running in clients. If you are making changes locally and expect to see them in your client that is running your MCP server, you need to use mcp.run() in mcp-server.py and your MCP_config.json should look like this: 
+  {
+    "mcpServers": {
+      "aparavi": {
+        "command": "node",
+        "args": [
+          "/Your/Path/To/mcp-server/bin/index.js"
+        ],
+        "env": {
+          "APARAVI_API_KEY": "",
+          "LLAMA_INDEX_API_KEY": ""
+        }
+      }
+    }
+  }
+
+```bash
+# Activate virtual environment if not already active
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Run Aparavi API test
+python tests/test_aparavi_connection.py
+
+# To run tests with specific tools, open tests/test_tool.py and configure main() to which test document and tool you want to test. Then run:
+python tests/test_tool.py 
+```
+
+## TODO
+
+  - Fix Llamaparse problem that stops it from outputing text
+    - Finalize return object once dealt with
+  - Correct automatic prompting of Client after OCR tool call
+  - Redundancy in LLamaParse class and pipelines
+  - SDK Implementation 
+  - A lot more testing
+  - Probably quite a bit more
+
+

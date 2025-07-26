@@ -1,0 +1,115 @@
+{
+  "components": [
+    {
+      "id": "response_1",
+      "provider": "response",
+      "config": {
+        "lanes": []
+      },
+      "ui": {
+        "position": {
+          "x": 260.5,
+          "y": 236.5
+        },
+        "measured": {
+          "width": 140,
+          "height": 257
+        },
+        "data": {
+          "class": "infrastructure",
+          "type": "default"
+        },
+        "formDataValid": true,
+        "edges": [
+          {
+            "selectable": true,
+            "deletable": true,
+            "id": "xy-edge__llamaparse_1source-text-0-response_1target-text-6",
+            "source": "llamaparse_1",
+            "target": "response_1",
+            "sourceHandle": "source-text-0",
+            "targetHandle": "target-text-6"
+          }
+        ]
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "llamaparse_1"
+        }
+      ]
+    },
+    {
+      "id": "llamaparse_1",
+      "provider": "llamaparse",
+      "config": {
+        "profile": "default",
+        "default": {
+          "parse_mode": "parse_page_with_lvm",
+          "result_type": "text",
+          "spreadsheet_extract_sub_tables": false,
+          "verbose": true,
+          "lvm_model": "anthropic-sonnet-4.0",
+          "system_prompt_append": "Extract all system components shown in this diagram. Include their labels, types (e.g. DB, UI, service), and any arrows or connections between them.\n"
+        }
+      },
+      "ui": {
+        "position": {
+          "x": 66.5,
+          "y": 291
+        },
+        "measured": {
+          "width": 140,
+          "height": 70
+        },
+        "data": {
+          "class": "data",
+          "type": "default"
+        },
+        "formDataValid": false,
+        "edges": [
+          {
+            "selectable": true,
+            "deletable": true,
+            "id": "xy-edge__webhook_1source-tags-0-llamaparse_1target-tags-0",
+            "source": "webhook_1",
+            "target": "llamaparse_1",
+            "sourceHandle": "source-tags-0",
+            "targetHandle": "target-tags-0"
+          }
+        ]
+      },
+      "input": [
+        {
+          "lane": "tags",
+          "from": "webhook_1"
+        }
+      ]
+    },
+    {
+      "id": "webhook_1",
+      "provider": "webhook",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "type": "webhook"
+      },
+      "ui": {
+        "position": {
+          "x": -104,
+          "y": 273
+        },
+        "measured": {
+          "width": 140,
+          "height": 116
+        },
+        "data": {
+          "class": "source",
+          "type": "default"
+        },
+        "formDataValid": true
+      }
+    }
+  ],
+  "id": "97d248f0-2992-4059-8edd-4a65b84339b9"
+}
