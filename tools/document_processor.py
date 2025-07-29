@@ -5,8 +5,8 @@ import os
 from pydantic import BaseModel, Field
 import json
 from integrations.aparavi.client import AparaviClient
-from integrations.aparavi.exceptions import AparaviError
 import sys
+from tools.helper import process_response
 
 class DocumentResponse(BaseModel):
     """Response from document processing."""
@@ -75,28 +75,18 @@ class DocumentProcessor:
             file_glob=str(file_path.absolute())
         )
 
-        # Extract text from the result
-        if responses and responses[0].get('status') == 'OK':
-            result = responses[0]
-            if result.get('data', {}).get('objects'):
-                # Get the first object's text (there should only be one)
-                first_object = next(iter(result['data']['objects'].values()))
-                if first_object.get('text'):
-                    # Get the raw text content
-                    text_content = first_object['text'][0]
-                    
-                    # If it's JSON encoded, try to decode it
-                    try:
-                        import json
-                        parsed = json.loads(text_content)
-                        if isinstance(parsed, dict) and 'content' in parsed:
-                            text_content = parsed['content']
-                    except (json.JSONDecodeError, TypeError):
-                        pass  # Use text as-is if not JSON
-                    
-                    return DocumentResponse(
-                        text=text_content,
-                        status="completed"
-                    )
+        if responses and len(responses) > 0:
+            result = process_response(responses[0])
+            print(f"Result: {result}", file=sys.stderr)
+            
+            return DocumentResponse(
+                text=result, 
+                status="completed"
+            )
 
-        raise AparaviError("No text content found in processing result") 
+        else:
+            return DocumentResponse(
+                text="",
+                status="failed"
+            )
+        

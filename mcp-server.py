@@ -10,7 +10,10 @@ from typing import AsyncIterator
 
 from tools.document_processor import DocumentProcessor, DocumentResponse
 from tools.llama_parse import LLamaParse, LlamaParseClient, LlamaParseResponse
+from prompts.architecture_builder import build_architecture_prompt
 from integrations.aparavi.client import AparaviClient
+# from aparavi_dtc_sdk import AparaviClient
+
 
 # Load environment variables
 load_dotenv()
@@ -31,8 +34,8 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     base_url = os.getenv("APARAVI_API_URL", "https://eaas-dev.aparavi.com")
     
     client = AparaviClient(
-        api_key=aparavi_api_key,
         base_url=base_url,
+        api_key=aparavi_api_key,
     )
 
     # LlamaParse client setup
@@ -57,7 +60,7 @@ mcp = FastMCP(
 
 # Register document processing tool
 @mcp.tool()
-def document_processor(file_path: str, session_id: str = None, ctx: Context = None) -> DocumentResponse:
+def Aparavi_Document_Processor(file_path: str, session_id: str = None, ctx: Context = None) -> DocumentResponse:
     """
     Use Aparavi to process a document.
     """
@@ -66,18 +69,7 @@ def document_processor(file_path: str, session_id: str = None, ctx: Context = No
     return processor.process_document(file_path=file_path)
 
 @mcp.tool()
-def ocr_system_diagram_parser(file_path: str, session_id: str = None, ctx: Context = None) -> LlamaParseResponse:
-    """
-    Turn an image of a system diagram into a working app using llama parse and Aparavi.
-    """
-    aparavi_client = ctx.request_context.lifespan_context.client
-    llama_client = ctx.request_context.lifespan_context.llama_client
-    
-    parser = LLamaParse(aparavi_client, llama_client)
-    return parser.ocr_system_diagram_parser(file_path=file_path)
-
-@mcp.tool()
-def llama_parse_document_parser(file_path: str, session_id: str = None, ctx: Context = None) -> LlamaParseResponse:
+def Advanced_OCR_Parser(file_path: str, session_id: str = None, ctx: Context = None) -> LlamaParseResponse:
     """
     Use LlamaParse's advanced Parsing capabilities to extract text from a document.
     """
@@ -86,6 +78,15 @@ def llama_parse_document_parser(file_path: str, session_id: str = None, ctx: Con
     
     parser = LLamaParse(aparavi_client, llama_client)
     return parser.llama_parse_document_parser(file_path=file_path)
+
+@mcp.prompt()
+def build_architecture(ctx: Context) -> str:
+    """
+    Build an architecture for a given document.
+    """
+    return build_architecture_prompt()
+
+
 
 if __name__ == "__main__":
    

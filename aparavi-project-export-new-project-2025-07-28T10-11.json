@@ -1,0 +1,113 @@
+{
+  "components": [
+    {
+      "id": "llamaparse_1",
+      "provider": "llamaparse",
+      "config": {
+        "profile": "default",
+        "default": {
+          "parse_mode": "parse_page_with_lvm",
+          "result_type": "markdown",
+          "spreadsheet_extract_sub_tables": true,
+          "verbose": false,
+          "lvm_model": "anthropic-sonnet-4.0",
+          "api_key": "llx-xqOcQHVHjNXdRVTJXXyipGsYgt7QJ7VkrXT65eNusRLHyNlk"
+        }
+      },
+      "ui": {
+        "position": {
+          "x": -3.932936109163947,
+          "y": 154.91836553583903
+        },
+        "measured": {
+          "width": 140,
+          "height": 70
+        },
+        "data": {
+          "class": "data",
+          "type": "default"
+        },
+        "formDataValid": true,
+        "edges": [
+          {
+            "source": "dropper_1",
+            "sourceHandle": "source-tags-0",
+            "target": "llamaparse_1",
+            "targetHandle": "target-tags-0",
+            "id": "xy-edge__dropper_1source-tags-0-llamaparse_1target-tags-0"
+          }
+        ]
+      },
+      "input": [
+        {
+          "lane": "tags",
+          "from": "dropper_1"
+        }
+      ]
+    },
+    {
+      "id": "response_1",
+      "provider": "response",
+      "config": {
+        "lanes": []
+      },
+      "ui": {
+        "position": {
+          "x": 222.36063982525204,
+          "y": 36.680391165524725
+        },
+        "measured": {
+          "width": 140,
+          "height": 257
+        },
+        "data": {
+          "class": "infrastructure",
+          "type": "default"
+        },
+        "formDataValid": true,
+        "edges": [
+          {
+            "selectable": true,
+            "deletable": true,
+            "id": "xy-edge__llamaparse_1source-text-0-response_1target-text-6",
+            "source": "llamaparse_1",
+            "target": "response_1",
+            "sourceHandle": "source-text-0",
+            "targetHandle": "target-text-6"
+          }
+        ]
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "llamaparse_1"
+        }
+      ]
+    },
+    {
+      "id": "dropper_1",
+      "provider": "dropper",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "type": "dropper"
+      },
+      "ui": {
+        "position": {
+          "x": -201.5,
+          "y": 164
+        },
+        "measured": {
+          "width": 140,
+          "height": 54
+        },
+        "data": {
+          "class": "source",
+          "type": "default"
+        },
+        "formDataValid": true
+      }
+    }
+  ],
+  "id": "6caacdf3-4c36-492d-ba56-6bc2f12a0766"
+}

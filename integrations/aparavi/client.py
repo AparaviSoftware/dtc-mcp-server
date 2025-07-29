@@ -7,7 +7,6 @@ import time
 import requests
 import glob
 import os
-import mimetypes
 import json
 from typing import Optional, Dict, Any, Tuple, List
 from .models import ResultBase
@@ -81,7 +80,10 @@ class AparaviClient:
                     with open(file_path, "rb") as f:
                         file_buffer = f.read()
                     filename = os.path.basename(file_path)
-                    content_type = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
+                    content_type = "application/octet-stream"
+                    
+                    print(f"File MIME type: {filename} -> {content_type}", file=sys.stderr)
+
                     files_to_upload.append(
                         ("files", (filename, file_buffer, content_type))
                     )
@@ -102,10 +104,11 @@ class AparaviClient:
                 with open(file_path, "rb") as f:
                     file_buffer = f.read()
                 filename = os.path.basename(file_path)
-                content_type = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
+                content_type ="application/octet-stream"
 
                 if self.logs != "none":
                     self._log(f"Uploading single file to webhook: {filename}", self.COLOR_ORANGE)
+                    self._log(f"File MIME type: {filename} -> {content_type}", self.COLOR_ORANGE)
 
                 headers.update({
                     "Content-Type": content_type,

@@ -50,15 +50,8 @@ async def test_document_processing(file_path: str, tool_name: str):
                         if line.startswith('data: '):
                             data = json.loads(line[6:])  # Skip 'data: ' prefix
                             if 'result' in data:
-                                print("\nExtracted text:")
-                                if isinstance(data['result'], dict) and 'text' in data['result']:
-                                    print(data['result']['text'])
-                                elif isinstance(data['result'], dict) and 'content' in data['result']:
-                                    for content in data['result']['content']:
-                                        if content.get('type') == 'text':
-                                            print(content['text'])
-                                else:
-                                    print("Raw result:", json.dumps(data['result'], indent=2))
+                                print("Raw result:", json.dumps(data['result'], indent=2))
+ 
                             elif 'error' in data:
                                 print("\nError:", data['error'])
                 else:
@@ -74,9 +67,8 @@ if __name__ == "__main__":
 
     # available tools:
     # llama_parse_document_parser
-    # ocr_system_diagram_parser
     # document_processor
 
     # available files are all in the tests/testdata folder
 
-    asyncio.run(test_document_processing(file_path="30-60-90-R&D-SFAIINTERNSHIP-DylanSavage.pdf", tool_name="document_processor"))
+    asyncio.run(test_document_processing(file_path="system_diagram.jpeg", tool_name="Advanced_OCR_Parser"))

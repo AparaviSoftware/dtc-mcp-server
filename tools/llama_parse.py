@@ -5,13 +5,16 @@ LlamaIndex capabilities. It supports multiple parsing strategies and tools
 while maintaining a consistent interface.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import os
 import json
 import sys
 from pathlib import Path
 from pydantic import BaseModel, Field
 from integrations.aparavi.client import AparaviClient
+from tools.helper import process_response
+# from aparavi_dtc_sdk import AparaviClient
+
 
 class LlamaParseClient:
     def __init__(self, api_key: str):
@@ -23,16 +26,12 @@ class LlamaParseClient:
 class LlamaParseResponse(BaseModel):
     """Response from LlamaParse processing."""
     text: str = Field(..., description="Extracted text from the document")
-    prompt: Optional[str] = Field(None, description="Optional prompt for further processing")
     status: str = Field(..., description="Processing status")
     
 
 class LLamaParse:
     """LLamaParse class for document parsing and processing.
     
-    This class provides two main tools for document parsing:
-    1. OCR - System Diagram Parser
-    2. LLamaParse - Document Parser
     
     Attributes:
         aparavi_client: Client for Aparavi API interactions
@@ -68,89 +67,6 @@ class LLamaParse:
 
         print(f"Pipeline data: {pipeline_data}", file=sys.stderr)
         return pipeline_data
-    
-    def ocr_system_diagram_parser(self, file_path: str) -> LlamaParseResponse:
-        """Parse system diagrams using OCR capabilities.
-        
-        Args:
-            file_path (str): Path to the system diagram file
-            
-        Returns:
-            LlamaParseResponse: Parsed diagram information
-        """
-        # Load pipeline configuration from package resources
-        package_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        pipeline_config_path = os.path.join(package_root, "resources", "pipelines", "system_architecture.json")
-        
-        if not os.path.exists(pipeline_config_path):
-            raise FileNotFoundError(f"Pipeline configuration not found at: {pipeline_config_path}")
-            
-        with open(pipeline_config_path, 'r') as f:
-            pipeline_data = json.load(f)
-            
-        # Insert LlamaIndex API key into pipeline configuration
-        pipeline_data = self.insert_llama_key(pipeline_data)
-            
-        pipeline_config = {
-            "pipeline": {
-                "source": "webhook_1",
-                "components": pipeline_data["components"]
-            }
-        }
-
-        # Validate file exists
-        file_path = Path(file_path)
-        if not file_path.exists():
-            raise FileNotFoundError(f"File not found: {file_path}")
-
-        print(f"\nProcessing document: {file_path}", file=sys.stderr)
-
-        # Create task and get server-assigned type
-        task_token, task_type, _ = self.aparavi_client.create_and_wait_for_task(
-            pipeline=pipeline_config,
-            name=f"Process {file_path.name}",
-            threads=None
-        )
-
-        # Send file to webhook using server-assigned type
-        responses = self.aparavi_client.send_payload_to_webhook(
-            token=task_token,
-            task_type=task_type,
-            file_glob=str(file_path.absolute())
-        )
-
-        # Extract text from the result
-        if responses and responses[0].get('status') == 'OK':
-            result = responses[0]
-            print(f"\nFull response: {json.dumps(result, indent=2)}", file=sys.stderr)
-            
-            # For now, return the raw response data
-            # TODO: Once we confirm the exact response format, update this to extract specific fields
-            return LlamaParseResponse(
-                text=json.dumps(result.get('data', {})),
-                status="completed",
-                prompt="""
-                You are a senior systems architect. Given the following components and system layout, write a **clear and professional architecture description** to help an AI developer understand the design.
-
-                Structure your response in **three main layers**:
-
-                1. **UI Layer** – User interfaces, clients, and external-facing systems
-                2. **Business Logic Layer** – Application logic, services, authentication, and messaging
-                3. **Data Layer** – Databases, file storage, and legacy systems
-
-                Also include a section called:
-
-                **Component Interactions** – Describe the data flow or request flow between components (e.g. “Browser sends request → Web Server → App Server → DB”).
-                
-                """,
-                raw_response=result
-            )
-        
-        return LlamaParseResponse(
-            text="",
-            status="failed",
-            prompt=None
-        )
 
     def llama_parse_document_parser(self, file_path: str) -> Dict[str, Any]:
         """Parse documents using LlamaIndex capabilities.
@@ -203,21 +119,72 @@ class LLamaParse:
             file_glob=str(file_path.absolute())
         )
 
-        # Extract text from the result
-        if responses and responses[0].get('status') == 'OK':
-            result = responses[0]
-            print(f"\nFull response: {json.dumps(result, indent=2)}", file=sys.stderr)
+        # Process response using helper
+        if responses and len(responses) > 0:
+            result = process_response(responses[0])
+            print(f"Result: {result}", file=sys.stderr)
             
-            # For now, return the raw response data
-            # TODO: Once we confirm the exact response format, update this to extract specific fields
             return LlamaParseResponse(
-                text=json.dumps(result.get('data', {})),
-                status="completed",
+                text=result, 
+                status="completed"
             )
         
         return LlamaParseResponse(
             text="",
-            status="failed",
-            prompt=None
+            status="failed"
         )
 
+    # def test_SDK_LlamaParse(self, file_path: str) -> LlamaParseResponse:
+    #     """Test using the Aparavi DTC SDK for document parsing.
+        
+    #     Args:
+    #         file_path (str): Path to the document to parse
+            
+    #     Returns:
+    #         LlamaParseResponse: Parsed document information
+    #     """
+    #     try:
+    #         # Execute pipeline using SDK
+    #         result = self.aparavi_client.execute_pipeline_workflow(
+    #             pipeline="./resources/pipelines/llamaparse.json",
+    #             file_glob="/Users/dylansavage/Desktop/mcp-server/tests/testdata/*.jpeg"
+    #         )
+
+    #         # SDK returns a list of results, one for each processed file
+    #         if result and isinstance(result, list) and len(result) > 0:
+    #             # Get the first result (since we're processing one file)
+    #             first_result = result[0]
+                
+    #             # Debug log the result structure
+    #             print(f"SDK Response structure: {json.dumps(first_result, indent=2)}", file=sys.stderr)
+                
+    #             # Extract text from the response
+    #             if isinstance(first_result, dict):
+    #                 data = first_result.get('data', {})
+    #                 objects = data.get('objects', {})
+                    
+    #                 # Get the first object's text
+    #                 if objects:
+    #                     first_object = next(iter(objects.values()))
+    #                     text = first_object.get('text', [''])[0] if isinstance(first_object.get('text'), list) else ''
+                        
+    #                     return LlamaParseResponse(
+    #                         text=text,
+    #                         status="completed"
+    #                     )
+
+    #         # If we couldn't extract text, return failure
+    #         print(f"Could not extract text from result: {result}", file=sys.stderr)
+    #         return LlamaParseResponse(
+    #             text="",
+    #             status="failed",
+    #             prompt=None
+    #         )
+            
+    #     except Exception as e:
+    #         print(f"SDK pipeline execution error: {e}", file=sys.stderr)
+    #         return LlamaParseResponse(
+    #             text="",
+    #             status="failed",
+    #             prompt=None
+    #         )
