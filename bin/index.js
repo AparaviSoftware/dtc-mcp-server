@@ -3,14 +3,14 @@
 const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 
-// Get package root directory
-const packageRoot = path.join(__dirname, '..');
-const pythonScriptPath = path.join(packageRoot, 'mcp-server.py');
-const setupScript = path.join(__dirname, 'setup.sh');
-const venvPath = path.join(packageRoot, '.venv');
+// Get package root directory using normalized paths
+const packageRoot = path.resolve(__dirname, '..');
+const pythonScriptPath = path.resolve(packageRoot, 'mcp-server.py');
+const setupScript = path.resolve(__dirname, 'setup.js');
+const venvPath = path.resolve(packageRoot, '.venv');
 
 // Run setup script
-const setup = spawnSync('bash', [setupScript], {
+const setup = spawnSync('node', [setupScript], {
   stdio: 'inherit'
 });
 
@@ -19,10 +19,10 @@ if (setup.status !== 0) {
   process.exit(1);
 }
 
-// Get the Python path based on OS
+// Get the Python path based on OS using normalized paths
 const pythonPath = process.platform === 'win32'
-  ? path.join(venvPath, 'Scripts', 'python')
-  : path.join(venvPath, 'bin', 'python');
+  ? path.resolve(venvPath, 'Scripts', 'python.exe')
+  : path.resolve(venvPath, 'bin', 'python');
 
 // Spawn Python process using the virtual environment
 const pythonProcess = spawn(pythonPath, [pythonScriptPath], {
@@ -48,4 +48,4 @@ process.on('SIGINT', () => {
 
 process.on('SIGTERM', () => {
   pythonProcess.kill('SIGTERM');
-}); 
+});

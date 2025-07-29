@@ -30,9 +30,9 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     aparavi_api_key = os.getenv("APARAVI_API_KEY")
     if not aparavi_api_key:
         raise ValueError("APARAVI_API_KEY environment variable is required")
-    
+
     base_url = os.getenv("APARAVI_API_URL", "https://eaas-dev.aparavi.com")
-    
+
     client = AparaviClient(
         base_url=base_url,
         api_key=aparavi_api_key,
@@ -44,7 +44,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         raise ValueError("LLAMA_INDEX_API_KEY environment variable is required")
 
     llama_client = LlamaParseClient(api_key=llama_api_key)
-    
+
     try:
         yield AppContext(client=client, llama_client=llama_client)
     finally:
@@ -55,7 +55,7 @@ mcp = FastMCP(
     name="aparavi-mcp",
     lifespan=app_lifespan,
     dependencies=["python-dotenv"],
-    stateless_http=True  
+    stateless_http=True
 )
 
 # Register document processing tool
@@ -75,21 +75,21 @@ def Advanced_OCR_Parser(file_path: str, session_id: str = None, ctx: Context = N
     """
     aparavi_client = ctx.request_context.lifespan_context.client
     llama_client = ctx.request_context.lifespan_context.llama_client
-    
+
     parser = LLamaParse(aparavi_client, llama_client)
     return parser.llama_parse_document_parser(file_path=file_path)
 
 @mcp.prompt()
-def build_architecture(ctx: Context) -> str:
+def build_architecture(extracted_components: str, ctx: Context) -> str:
     """
     Build an architecture for a given document.
     """
-    return build_architecture_prompt()
+    return build_architecture_prompt(extracted_components)
 
 
 
 if __name__ == "__main__":
-   
+
     # For testing locally in repo
     # mcp.run(transport="http")
 

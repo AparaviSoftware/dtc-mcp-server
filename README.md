@@ -212,14 +212,4 @@ python tests/test_aparavi_connection.py
 python tests/test_tool.py 
 ```
 
-## TODO
-
-  - Fix Llamaparse problem that stops it from outputing text
-    - Finalize return object once dealt with
-  - Correct automatic prompting of Client after OCR tool call
-  - Redundancy in LLamaParse class and pipelines
-  - SDK Implementation 
-  - A lot more testing
-  - Probably quite a bit more
-
 

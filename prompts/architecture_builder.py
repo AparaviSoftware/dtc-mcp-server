@@ -1,5 +1,5 @@
-def build_architecture_prompt() -> str:
-    prompt = """You are a senior systems developer. Given the previous components and system layout, write a **clear and professional architecture description** to help an AI yourself understand the design.
+def build_architecture_prompt(architecture_components: str) -> str:
+    prompt = """You are a senior systems developer. Given these components and system layout, write a **clear and professional architecture description** to help an AI yourself understand the design.
 
                 Structure your architecture in **three main layers**:
 
@@ -12,5 +12,7 @@ def build_architecture_prompt() -> str:
                 **Component Interactions** – Describe the data flow or request flow between components (e.g. “Browser sends request → Web Server → App Server → DB”).
 
                 Then, use the previous components and system layout to build the Application.
+
+                {architecture_components}
                 """
     return prompt

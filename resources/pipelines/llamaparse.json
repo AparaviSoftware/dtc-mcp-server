@@ -50,7 +50,8 @@
           "result_type": "text",
           "spreadsheet_extract_sub_tables": false,
           "verbose": false,
-          "lvm_model": "anthropic-sonnet-4.0"
+          "lvm_model": "anthropic-sonnet-4.0",
+          "api_key": "llx-83KB1xiprq9l3iCPvFroyucNvzR6vJQcXssCR8nCt2edPZr8"
         }
       },
       "ui": {

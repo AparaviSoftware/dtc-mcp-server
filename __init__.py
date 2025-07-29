@@ -7,7 +7,7 @@ This server allows Language Models to process documents through Aparavi's pipeli
 from . import tools
 from . import prompts
 from . import resources
-from . import config
+from . import utils
 
 __version__ = "0.1.0"
-__all__ = ["tools", "prompts", "resources", "config"] 
+__all__ = ["tools", "prompts", "resources", "utils"] 

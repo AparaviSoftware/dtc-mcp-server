@@ -1,12 +1,12 @@
 """Tool for processing documents through Aparavi API."""
 
-from pathlib import Path
-import os
+# from pathlib import Path
 from pydantic import BaseModel, Field
 import json
 from integrations.aparavi.client import AparaviClient
 import sys
 from tools.helper import process_response
+from utils.path_utils import PathUtils
 
 class DocumentResponse(BaseModel):
     """Response from document processing."""
@@ -25,10 +25,9 @@ class DocumentProcessor:
         self.client = client
         
         # Load pipeline configuration from package resources
-        package_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        pipeline_config_path = os.path.join(package_root, "resources", "pipelines", "simpleparser.json")
+        pipeline_config_path = PathUtils.get_resource_path("resources/pipelines/simpleparser.json")
         
-        if not os.path.exists(pipeline_config_path):
+        if not PathUtils.is_file_exists(pipeline_config_path):
             raise FileNotFoundError(f"Pipeline configuration not found at: {pipeline_config_path}")
             
         with open(pipeline_config_path, 'r') as f:
@@ -55,8 +54,8 @@ class DocumentProcessor:
             AparaviError: For API processing errors
         """
         # Validate file exists
-        file_path = Path(file_path)
-        if not file_path.exists():
+        file_path = PathUtils.normalize_path(file_path)
+        if not PathUtils.is_file_exists(file_path):
             raise FileNotFoundError(f"File not found: {file_path}")
 
         print(f"\nProcessing document: {file_path}", file=sys.stderr)
@@ -72,7 +71,7 @@ class DocumentProcessor:
         responses = self.client.send_payload_to_webhook(
             token=task_token,
             task_type=task_type,
-            file_glob=str(file_path.absolute())
+            file_glob=str(file_path)  # normalize_path already gives us absolute path
         )
 
         if responses and len(responses) > 0:
