@@ -11,9 +11,8 @@ from typing import AsyncIterator
 from tools.document_processor import DocumentProcessor, DocumentResponse
 from tools.llama_parse import LLamaParse, LlamaParseClient, LlamaParseResponse
 from prompts.architecture_builder import build_architecture_prompt
-from integrations.aparavi.client import AparaviClient
-# from aparavi_dtc_sdk import AparaviClient
-
+# from integrations.aparavi.client import AparaviClient
+from aparavi_dtc_sdk import AparaviClient
 
 # Load environment variables
 load_dotenv()
@@ -66,7 +65,7 @@ def Aparavi_Document_Processor(file_path: str, session_id: str = None, ctx: Cont
     """
     client = ctx.request_context.lifespan_context.client
     processor = DocumentProcessor(client)
-    return processor.process_document(file_path=file_path)
+    return processor.SDK_Document_Processor(file_path=file_path)
 
 @mcp.tool()
 def Advanced_OCR_Parser(file_path: str, session_id: str = None, ctx: Context = None) -> LlamaParseResponse:
@@ -77,7 +76,7 @@ def Advanced_OCR_Parser(file_path: str, session_id: str = None, ctx: Context = N
     llama_client = ctx.request_context.lifespan_context.llama_client
 
     parser = LLamaParse(aparavi_client, llama_client)
-    return parser.llama_parse_document_parser(file_path=file_path)
+    return parser.SDK_LlamaParse(file_path=file_path)
 
 @mcp.prompt()
 def build_architecture(extracted_components: str, ctx: Context) -> str:
@@ -91,7 +90,7 @@ def build_architecture(extracted_components: str, ctx: Context) -> str:
 if __name__ == "__main__":
 
     # For testing locally in repo
-    # mcp.run(transport="http")
+    mcp.run(transport="http")
 
     # For testing immediate changes on Client side
-    mcp.run()
+    # mcp.run()
