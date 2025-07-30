@@ -80,15 +80,23 @@ function createVirtualEnv() {
 
 function installDependencies() {
   logToStderr('\nInstalling Python dependencies...');
-  const requirementsPath = path.resolve(packageRoot, 'requirements.txt');
+  const mainRequirementsPath = path.resolve(packageRoot, 'requirements.txt');
+  const SDKRequirementsPath = path.resolve(packageRoot, 'requirements-testpypi.txt');
 
   // Upgrade pip first
-  if (!runCommand(venvPip, ['install', '--upgrade', 'pip'])) {
+  if (!runCommand(venvPip, ['install', 'pip'])) {
     return false;
   }
 
-  // Install requirements with output redirected to stderr
-  return runCommand(venvPip, ['install', '-r', requirementsPath]);
+  // Install main requirements
+  logToStderr('\nInstalling main requirements...');
+  if (!runCommand(venvPip, ['install', '-r', mainRequirementsPath])) {
+    return false;
+  }
+
+  // Install test PyPI requirements
+  logToStderr('\nInstalling Aparavi SDK requirements...');
+  return runCommand(venvPip, ['install', '-r', SDKRequirementsPath]);
 }
 
 function setup() {
