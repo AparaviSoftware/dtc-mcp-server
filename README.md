@@ -54,7 +54,7 @@ aparavi-mcp
 ```bash
 # Clone the repository
 git clone https://github.com/AparaviSoftware/mcp-server
-cd aparavi-mcp
+cd mcp-server
 
 # Make setup script executable
 chmod +x bin/setup.sh

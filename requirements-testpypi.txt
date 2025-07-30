@@ -1,0 +1,5 @@
+# Special packages from test PyPI
+--index-url https://test.pypi.org/simple/
+--extra-index-url https://pypi.org/simple/
+fastmcp>=0.1.0
+aparavi-dtc-sdk
