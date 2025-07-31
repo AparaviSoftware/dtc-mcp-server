@@ -1,6 +1,6 @@
 {
   "name": "aparavi-mcp",
-  "version": "1.0.3",
+  "version": "1.1.1",
   "description": "Node.js wrapper for Aparavi MCP Server",
   "main": "bin/index.js",
   "bin": {
@@ -21,6 +21,7 @@
     "utils",
     "mcp-server.py",
     "requirements.txt",
+    "requirements-testpypi.txt",
     "__init__.py"
   ],
   "keywords": [

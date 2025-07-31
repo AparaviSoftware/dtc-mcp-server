@@ -70,4 +70,4 @@ if __name__ == "__main__":
 
     # available files are all in the tests/testdata folder
 
-    asyncio.run(test_document_processing(file_path="30-60-90-R&D-SFAIINTERNSHIP-DylanSavage.pdf", tool_name="Aparavi_Document_Processor"))
+    asyncio.run(test_document_processing(file_path="system_diagram.jpeg", tool_name="Advanced_OCR_Parser"))

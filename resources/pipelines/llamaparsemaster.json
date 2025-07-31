@@ -1,0 +1,113 @@
+{
+  "source": "webhook_1",
+  "components": [
+    {
+      "id": "llamaparse_1",
+      "provider": "llamaparse",
+      "config": {
+          "default": {
+            "parse_mode": "parse_page_with_lvm",
+            "result_type": "markdown",
+            "spreadsheet_extract_sub_tables": true,
+            "lvm_model": "anthropic-sonnet-4.0"
+          }
+        },
+        "ui": {
+          "position": {
+            "x": 380,
+            "y": 400
+          },
+          "measured": {
+            "width": 180,
+            "height": 98
+          },
+          "data": {
+            "class": "data",
+            "type": "default"
+          },
+          "formDataValid": false,
+          "edges": [
+            {
+              "selectable": true,
+              "deletable": true,
+              "id": "xy-edge__webhook_1source-tags-0-llamaparse_1target-tags-0",
+              "source": "webhook_1",
+              "target": "llamaparse_1",
+              "sourceHandle": "source-tags-0",
+              "targetHandle": "target-tags-0"
+            }
+          ]
+        },
+        "input": [
+          {
+            "lane": "tags",
+            "from": "webhook_1"
+          }
+        ]
+      },
+      {
+        "id": "response_1",
+        "provider": "response",
+        "config": {
+          "lanes": []
+        },
+        "ui": {
+          "position": {
+            "x": 700,
+            "y": 340
+          },
+          "measured": {
+            "width": 180,
+            "height": 338
+          },
+          "data": {
+            "class": "infrastructure",
+            "type": "default"
+          },
+          "formDataValid": true,
+          "edges": [
+            {
+              "selectable": true,
+              "deletable": true,
+              "id": "xy-edge__llamaparse_1source-text-0-response_1target-text-6",
+              "source": "llamaparse_1",
+              "target": "response_1",
+              "sourceHandle": "source-text-0",
+              "targetHandle": "target-text-6"
+            }
+          ]
+        },
+        "input": [
+          {
+            "lane": "text",
+            "from": "llamaparse_1"
+          }
+        ]
+      },
+      {
+        "id": "webhook_1",
+        "provider": "webhook",
+        "config": {
+          "hideForm": true,
+          "mode": "Source",
+          "type": "webhook"
+        },
+        "ui": {
+          "position": {
+            "x": 120,
+            "y": 400
+          },
+          "measured": {
+            "width": 180,
+            "height": 158
+          },
+          "data": {
+            "class": "source",
+            "type": "default"
+          },
+          "formDataValid": true
+        }
+      }
+    ],
+    "id": "d398418e-cd25-4c23-b6e8-dfb7cf231ba1"
+  }
