@@ -44,6 +44,7 @@ An MCP (Model Context Protocol) server that integrates with Aparavi's document p
 
 The fastest way to get started is using `npx`:
 
+First get your API-Key from https://dtc-dev.aparavi.com
 1. **Run the Server**
    ```bash
    # For Unix/Linux/macOS - Set API keys in terminal
@@ -54,7 +55,6 @@ The fastest way to get started is using `npx`:
 
    # OR for Windows PowerShell
    $env:APARAVI_API_KEY="your_api_key_here"
-
 
    # Run the server (same command for all platforms)
    npx aparavi-mcp@latest
