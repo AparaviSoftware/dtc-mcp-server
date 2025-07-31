@@ -44,7 +44,7 @@ An MCP (Model Context Protocol) server that integrates with Aparavi's document p
 
 The fastest way to get started is using `npx`:
 
-First get your API-Key from https://dtc-dev.aparavi.com
+First get your API-Key from https://dtc-dev.aparavi.com/usage
 1. **Run the Server**
    ```bash
    # For Unix/Linux/macOS - Set API keys in terminal
