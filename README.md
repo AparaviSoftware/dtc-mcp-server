@@ -63,7 +63,7 @@ First get your API-Key [here](https://dtc-dev.aparavi.com)
    ```
 
 2. **Add Server to your Client**
-   Update your `MCP_config.json` file in the client ([Windsurf](https://windsurf.com/university/tutorials/configuring-first-mcp-server), [Claude](https://www.youtube.com/watch?v=DfWHX7kszQI), [Cursor](https://www.youtube.com/watch?v=RCFe1L9qm3E) with this:
+   Update your `MCP_config.json` file in the client ([Windsurf](https://windsurf.com/university/tutorials/configuring-first-mcp-server), [Claude](https://www.youtube.com/watch?v=DfWHX7kszQI), [Cursor](https://www.youtube.com/watch?v=RCFe1L9qm3E)) with this:
    ```json
     {
       "mcpServers": {
