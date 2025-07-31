@@ -68,7 +68,7 @@ First get your API-Key from our Development Portal [here](https://dtc-dev.aparav
     {
       "mcpServers": {
         "aparavi": {
-          "serverUrl": "http://localhost:8000/mcp"
+          "url": "http://localhost:8000/mcp"
         }
       }
     }
