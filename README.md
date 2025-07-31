@@ -44,8 +44,8 @@ An MCP (Model Context Protocol) server that integrates with Aparavi's document p
 
 The fastest way to get started is using `npx`:
 
-First get your API-Key from https://dtc-dev.aparavi.com
-(you can watch video for orientation https://aparavi.com/documentation-aparavi/data-toolchain-for-ai-documentation/getting-started-data-toolchain-for-ai-documentation/overview-8/) 
+First get your API-Key [here](https://dtc-dev.aparavi.com).
+(you can watch this [video](https://aparavi.com/documentation-aparavi/data-toolchain-for-ai-documentation/getting-started-data-toolchain-for-ai-documentation/overview-8/) for orientation)
  
 1. **Run the Server**
    ```bash
