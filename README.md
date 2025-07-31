@@ -44,8 +44,8 @@ An MCP (Model Context Protocol) server that integrates with Aparavi's document p
 
 The fastest way to get started is using `npx`:
 
-First get your API-Key [here](https://dtc-dev.aparavi.com).
-(you can watch this [video](https://aparavi.com/documentation-aparavi/data-toolchain-for-ai-documentation/getting-started-data-toolchain-for-ai-documentation/overview-8/) for orientation)
+First get your API-Key [here](https://dtc-dev.aparavi.com)
+(you can watch this [video](https://aparavi.com/documentation-aparavi/data-toolchain-for-ai-documentation/getting-started-data-toolchain-for-ai-documentation/overview-8/) for orientation).
  
 1. **Run the Server**
    ```bash
@@ -63,7 +63,7 @@ First get your API-Key [here](https://dtc-dev.aparavi.com).
    ```
 
 2. **Add Server to your Client**
-   Update your `MCP_config.json` file in the client with this:
+   Update your `MCP_config.json` file in the client ([Windsurf](https://windsurf.com/university/tutorials/configuring-first-mcp-server), [Claude](https://www.youtube.com/watch?v=DfWHX7kszQI), [Cursor](https://www.youtube.com/watch?v=RCFe1L9qm3E) with this:
    ```json
     {
       "mcpServers": {
