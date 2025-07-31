@@ -38,23 +38,11 @@ An MCP (Model Context Protocol) server that integrates with Aparavi's document p
 - Node.js 14 or higher
 - Git (for development setup)
 
-## Quick Start
-
-The fastest way to get started is using `npx`:
-
-```bash
-# Set required environment variables
-export APARAVI_API_KEY=your_api_key_here
-
-# Run the server
-npx aparavi-mcp
-```
-
-## Installation
+## Quick Start Installation
 
 ### For Users
 
-There are two ways to install the MCP server as a user:
+The fastest way to get started is using `npx`:
 
 1. **Run the Server**
    ```bash
